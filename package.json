@@ -1,28 +1,16 @@
 {
-  "name": "namerr-backend",
+  "name": "namerr-monorepo",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js"
+    "dev": "npm run dev --workspace=@namerr/backend & npm run dev --workspace=@namerr/frontend",
+    "build": "npm run build --workspaces",
+    "install:all": "npm install"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
-    "@types/express": "^5.0.2",
-    "@types/node": "^22.15.30",
-    "@typescript-eslint/eslint-plugin": "^8.33.1",
-    "@typescript-eslint/parser": "^8.33.1",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.8.3"
-  },
-  "dependencies": {
-    "express": "^5.1.0"
-  },
-  "engines": {
-    "node": ">=20.11.1"
+    "typescript": "^5.0.0"
   }
 }

@@ -1,0 +1,6 @@
+{
+  "/page": "app/page.js",
+  "/api/rate-name/route": "app/api/rate-name/route.js",
+  "/api/suggest-middle-names/route": "app/api/suggest-middle-names/route.js",
+  "/api/suggest-similar-names/route": "app/api/suggest-similar-names/route.js"
+}
