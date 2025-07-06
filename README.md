@@ -110,8 +110,6 @@ The backend provides:
 ### API Endpoints
 
 - `POST /api/rate-name` - Rate a name combination
-- `POST /api/suggest-middle-names` - Get middle name suggestions
-- `POST /api/suggest-similar-names` - Get similar name suggestions
 - `GET /health` - Health check endpoint
 
 ### Development

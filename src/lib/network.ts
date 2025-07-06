@@ -1,33 +1,36 @@
 import Replicate from "replicate";
+import { RateNameResponse } from "./types";
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
-const model = "meta/meta-llama-3-70b-instruct";
+const model = "meta/meta-llama-3.1-405b-instruct";
 
 export const getNameRating = async (
   name: string,
   style: string | undefined
-) => {
-  const prompt = `Rate the name "${name}" from 1 to 100 based on its aesthetic appeal and provide a brief explanation (1-2 sentences) of why it's good or bad. Focus on the name's aesthetic qualities and how the first name fits with the last name. Only focus on the first name because the last name cannot be changed.
+): Promise<RateNameResponse> => {
+  const prompt = `Here is a baby name: "${name}". Provide a brief explanation (1-2 sentences) of why it's good or bad. Focus on the name's aesthetic qualities and how the first name fits with the last name. Only focus on the first name because the last name cannot be changed. ${
+    style != "none" ? `The style requested is ${style}. So please take that into account` : ""
+  }
 
-  Don't be afraid to be critical or score the name low. Keep the explanation concise and focused on the name's aesthetic qualities.
+  Also provide a brief explanation of the name's origin.
 
-  The person's style is ${style}, so take this into account when rating the name.
+  Don't be afraid to be critical. Keep the explanation concise and focused on the name's aesthetic qualities.
 
   Suggest 4-6 middle names that would go well with the name.
   Suggest 4-6 similar names that would go well with the name.
 
   Format your response exactly like this so it can be parsed:
-  --Rating--: [number]
   --Explanation--: [brief explanation]
+  --Origin--: [brief explanation of the name's origin]
   --Middle names--: [list of middle names]
   --Similar names--: [list of similar names]
 
   Here is an example of a good response:
-  --Rating--: 68
   --Explanation--: "The name is unique and has a nice flow to it. It's a good fit for a boy."
+  --Origin--: "The name is of Greek origin and means 'God's gift'."
   --Middle names--: James, John, Robert, Michael, David
   --Similar names--: John, Robert, Michael, David, James
   `;
@@ -44,10 +47,10 @@ export const getNameRating = async (
     const output = await replicate.run(model, { input });
 
     const response = Array.isArray(output) ? output.join("") : String(output);
-    const ratingMatch = response.match(/--Rating--:\s*(\d+)/);
     const explanationMatch = response.match(/--Explanation--:\s*(.+)/);
     const middleNamesMatch = response.match(/--Middle names--:\s*(.+)/);
     const similarNamesMatch = response.match(/--Similar names--:\s*(.+)/);
+    const originMatch = response.match(/--Origin--:\s*(.+)/);
 
     const middleNames = middleNamesMatch
       ? middleNamesMatch[1].trim().split(",")
@@ -57,12 +60,18 @@ export const getNameRating = async (
       : [];
 
     return {
-      rating: ratingMatch ? parseInt(ratingMatch[1]) : null,
-      explanation: explanationMatch ? explanationMatch[1].trim() : null,
+      feedback: explanationMatch ? explanationMatch[1].trim() : null,
+      origin: originMatch ? originMatch[1].trim() : null,
       middleNames,
       similarNames,
     };
   } catch (error) {
-    return { rating: null, explanation: null };
+    console.error("Error rating name", error);
+    return {
+      feedback: null,
+      origin: null,
+      middleNames: [],
+      similarNames: [],
+    };
   }
 };

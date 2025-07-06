@@ -15,9 +15,13 @@ export async function POST(request: NextRequest) {
     }
 
     const fullName = `${firstName} ${lastName}`;
-    const { rating, explanation, middleNames, similarNames } = await getNameRating(fullName, style);
+    const { feedback, origin, middleNames, similarNames } = await getNameRating(
+      fullName,
+      style
+    );
 
-    if (!rating || !explanation) {
+    if (!feedback) {
+      console.log("Failed to rate name", { fullName, style });
       return NextResponse.json(
         { error: "Failed to rate name" },
         { status: 400 }
@@ -25,8 +29,8 @@ export async function POST(request: NextRequest) {
     }
 
     const response: RateNameResponse = {
-      score: rating,
-      feedback: explanation,
+      origin,
+      feedback,
       middleNames,
       similarNames,
     };

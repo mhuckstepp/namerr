@@ -10,8 +10,8 @@ export interface RateNameRequest {
 }
 
 export interface RateNameResponse {
-  score: number;
-  feedback: string;
+  origin: string | null;
+  feedback: string | null;
   middleNames: string[];
   similarNames: string[];
 }
