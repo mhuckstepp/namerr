@@ -8,12 +8,10 @@ const replicate = new Replicate({
 const model = "meta/meta-llama-3.1-405b-instruct";
 
 export const getNameRating = async (
-  name: string,
-  style: string | undefined
+  firstName: string,
+  lastName: string
 ): Promise<RateNameResponse> => {
-  const prompt = `Here is a baby name: "${name}". Provide a brief explanation (1-2 sentences) of why it's good or bad. Focus on the name's aesthetic qualities and how the first name fits with the last name. Only focus on the first name because the last name cannot be changed. ${
-    style != "none" ? `The style requested is ${style}. So please take that into account` : ""
-  }
+  const prompt = `Here is a baby name: "${firstName} ${lastName}". Provide a brief explanation (1-2 sentences) of why it's good or bad. Focus on the name's aesthetic qualities and how the first name fits with the last name. Only focus on the first name because the last name cannot be changed. 
 
   Also provide a brief explanation of the name's origin.
 

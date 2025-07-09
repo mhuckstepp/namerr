@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { getNameRating } from "@/lib/network";
+import { getSavedNameByLookup } from "@/lib/database";
 import { RateNameRequest, RateNameResponse } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
   try {
-    const { firstName, lastName, style }: RateNameRequest =
-      await request.json();
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { firstName, lastName }: RateNameRequest = await request.json();
 
     if (!firstName || !lastName) {
       return NextResponse.json(
@@ -14,14 +22,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const fullName = `${firstName} ${lastName}`;
+    // Check if we already have this name rated in the database
+    const existingRating = await getSavedNameByLookup(
+      session.user.id,
+      firstName,
+      lastName
+    );
+
+    if (existingRating) {
+      // Return cached result
+      const response: RateNameResponse = {
+        origin: existingRating.origin,
+        feedback: existingRating.feedback,
+        middleNames: existingRating.middleNames,
+        similarNames: existingRating.similarNames,
+      };
+
+      return NextResponse.json({
+        ...response,
+        cached: true,
+        savedNameId: existingRating.id,
+      });
+    }
+
+    // Get new rating from AI
     const { feedback, origin, middleNames, similarNames } = await getNameRating(
-      fullName,
-      style
+      firstName,
+      lastName
     );
 
     if (!feedback) {
-      console.log("Failed to rate name", { fullName, style });
       return NextResponse.json(
         { error: "Failed to rate name" },
         { status: 400 }
@@ -35,7 +65,10 @@ export async function POST(request: NextRequest) {
       similarNames,
     };
 
-    return NextResponse.json(response);
+    return NextResponse.json({
+      ...response,
+      cached: false,
+    });
   } catch (error) {
     console.error("Error in rate-name API:", error);
     return NextResponse.json(

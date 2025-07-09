@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getSavedNames } from "@/lib/kv";
+import { getSavedNamesWithMetadata } from "@/lib/database";
 
 export async function GET() {
   try {
@@ -11,7 +11,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const savedNames = await getSavedNames(session.user.id);
+    const savedNames = await getSavedNamesWithMetadata(session.user.id);
 
     return NextResponse.json({ names: savedNames });
   } catch (error) {

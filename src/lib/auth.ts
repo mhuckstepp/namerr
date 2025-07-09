@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { getOrCreateUser } from "./database";
 
 export const authOptions = {
   providers: [
@@ -9,9 +10,36 @@ export const authOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }: any) {
+      if (user.email) {
+        try {
+          // Create or update user in our database
+          const dbUser = await getOrCreateUser(
+            user.email,
+            user.name || undefined,
+            user.image || undefined
+          );
+          // Add the database user ID to the user object
+          user.id = dbUser.id;
+          return true;
+        } catch (error) {
+          console.error("Error creating/updating user:", error);
+          return false;
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user }: any) {
+      if (user) {
+        // Store the database user ID in the token
+        token.dbUserId = user.id;
+      }
+      return token;
+    },
     async session({ session, token }: any) {
       if (session?.user) {
-        session.user.id = token.sub;
+        // Use the database user ID instead of the OAuth ID
+        session.user.id = token.dbUserId;
       }
       return session;
     },

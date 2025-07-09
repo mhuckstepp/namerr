@@ -88,7 +88,6 @@ The frontend is built with:
 - Real-time name rating
 - Middle name suggestions
 - Similar name recommendations
-- Multiple name styles (Artsy, Polite, Unique, Classic, Modern, Nature)
 
 ### Development
 
