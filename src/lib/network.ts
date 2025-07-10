@@ -15,6 +15,8 @@ export const getNameRating = async (
 
   Also provide a brief explanation of the name's origin.
 
+  Give a general overview of the name's popularity both historically and currently and if it's for a boy or girl.
+
   Don't be afraid to be critical. Keep the explanation concise and focused on the name's aesthetic qualities.
 
   Suggest 4-6 middle names that would go well with the name.
@@ -23,12 +25,14 @@ export const getNameRating = async (
   Format your response exactly like this so it can be parsed:
   --Explanation--: [brief explanation]
   --Origin--: [brief explanation of the name's origin]
+  --Popularity--: [brief explanation of the name's popularity]
   --Middle names--: [list of middle names]
   --Similar names--: [list of similar names]
 
   Here is an example of a good response:
   --Explanation--: "The name is unique and has a nice flow to it. It's a good fit for a boy."
   --Origin--: "The name is of Greek origin and means 'God's gift'."
+  --Popularity--: "The name is very popular in the United States, ranking in the top 100 names for both boys and girls."
   --Middle names--: James, John, Robert, Michael, David
   --Similar names--: John, Robert, Michael, David, James
   `;
@@ -49,6 +53,7 @@ export const getNameRating = async (
     const middleNamesMatch = response.match(/--Middle names--:\s*(.+)/);
     const similarNamesMatch = response.match(/--Similar names--:\s*(.+)/);
     const originMatch = response.match(/--Origin--:\s*(.+)/);
+    const popularityMatch = response.match(/--Popularity--:\s*(.+)/);
 
     const middleNames = middleNamesMatch
       ? middleNamesMatch[1].trim().split(",")
@@ -60,6 +65,7 @@ export const getNameRating = async (
     return {
       feedback: explanationMatch ? explanationMatch[1].trim() : null,
       origin: originMatch ? originMatch[1].trim() : null,
+      popularity: popularityMatch ? popularityMatch[1].trim() : null,
       middleNames,
       similarNames,
     };
@@ -68,6 +74,7 @@ export const getNameRating = async (
     return {
       feedback: null,
       origin: null,
+      popularity: null,
       middleNames: [],
       similarNames: [],
     };

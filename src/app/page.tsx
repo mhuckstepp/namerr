@@ -8,8 +8,7 @@ import HeaderSection from "@/components/HeaderSection";
 import NameInputForm from "@/components/NameInputForm";
 import NameResults from "@/components/NameResults";
 import SavedNamesSection from "@/components/SavedNamesSection";
-import { RateNameResponse } from "@/lib/types";
-import { SavedNameData } from "@/lib/database";
+import { RateNameResponse, SavedNameData } from "@/lib/types";
 
 export default function BabyNameHelper() {
   const { data: session } = useSession();
@@ -99,6 +98,7 @@ export default function BabyNameHelper() {
         lastName,
         origin: response.origin,
         feedback: response.feedback,
+        popularity: response.popularity,
         middleNames: response.middleNames,
         similarNames: response.similarNames || [],
       };
@@ -112,10 +112,11 @@ export default function BabyNameHelper() {
     }
   };
 
-  const isNameSaved = (firstName: string, lastName: string) =>
-    savedNames.some(
-      (name) => name.firstName === firstName && name.lastName === lastName
-    );
+  const isNameSaved = savedNames.some(
+    (name) =>
+      name.firstName.toLowerCase() === firstName.toLowerCase() &&
+      name.lastName.toLowerCase() === lastName.toLowerCase()
+  );
 
   const handleSavedNameClick = (name: SavedNameData) => {
     setResults(name);
@@ -145,7 +146,7 @@ export default function BabyNameHelper() {
             results={results}
             onSaveName={saveName}
             savingName={savingName}
-            isNameSaved={isNameSaved(firstName, lastName)}
+            isNameSaved={isNameSaved}
           />
         )}
 

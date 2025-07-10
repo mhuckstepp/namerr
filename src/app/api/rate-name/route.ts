@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
       const response: RateNameResponse = {
         origin: existingRating.origin,
         feedback: existingRating.feedback,
+        popularity: existingRating.popularity,
         middleNames: existingRating.middleNames,
         similarNames: existingRating.similarNames,
       };
@@ -46,10 +47,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get new rating from AI
-    const { feedback, origin, middleNames, similarNames } = await getNameRating(
-      firstName,
-      lastName
-    );
+    const { feedback, origin, popularity, middleNames, similarNames } =
+      await getNameRating(firstName, lastName);
 
     if (!feedback) {
       return NextResponse.json(
@@ -61,6 +60,7 @@ export async function POST(request: NextRequest) {
     const response: RateNameResponse = {
       origin,
       feedback,
+      popularity,
       middleNames,
       similarNames,
     };

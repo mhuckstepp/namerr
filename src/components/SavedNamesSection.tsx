@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { BookmarkCheck } from "lucide-react";
-import { SavedNameData } from "@/lib/database";
+import { SavedNameData } from "@/lib/types";
 
 interface SavedNamesSectionProps {
   savedNames: SavedNameData[];

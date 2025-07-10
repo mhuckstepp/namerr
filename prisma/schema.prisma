@@ -34,6 +34,7 @@ model SavedName {
   lastName    String
   fullName    String
   origin      String?  // e.g., "Greek", "Latin", "Hebrew"
+  popularity String? // e.g. "Very popular in the 80's"
   feedback    String?  // The AI feedback about the name
   middleNames String[] // Array of suggested middle names
   similarNames String[] // Array of similar names

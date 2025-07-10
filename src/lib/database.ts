@@ -1,18 +1,28 @@
 import { prisma } from "./db";
-import { RateNameResponse } from "./types";
+import { RateNameResponse, SavedNameData } from "./types";
+import type { SavedName } from "@prisma/client";
 
-export interface SavedNameData {
-  id?: string;
-  userId?: string;
-  firstName: string;
-  lastName: string;
-  fullName?: string;
-  origin: string | null;
-  feedback: string | null;
-  middleNames: string[];
-  similarNames: string[];
-  savedAt?: Date;
+function mapSavedNameToData(savedName: SavedName): SavedNameData {
+  return {
+    id: savedName.id,
+    userId: savedName.userId,
+    firstName: savedName.firstName,
+    lastName: savedName.lastName,
+    fullName: savedName.fullName,
+    origin: savedName.origin,
+    feedback: savedName.feedback,
+    popularity: savedName.popularity,
+    middleNames: savedName.middleNames,
+    similarNames: savedName.similarNames,
+    savedAt: savedName.savedAt,
+  };
 }
+
+function mapPrismaToData<T, R>(mapper: (item: T) => R) {
+  return (items: T[]): R[] => items.map(mapper);
+}
+
+const mapSavedNames = mapPrismaToData(mapSavedNameToData);
 
 export async function saveNameWithMetadata(
   userId: string,
@@ -41,6 +51,7 @@ export async function saveNameWithMetadata(
         data: {
           origin: metadata.origin,
           feedback: metadata.feedback,
+          popularity: metadata.popularity,
           middleNames: metadata.middleNames,
           similarNames: metadata.similarNames,
           savedAt: new Date(),
@@ -49,18 +60,7 @@ export async function saveNameWithMetadata(
 
       return {
         success: true,
-        savedName: {
-          id: updatedName.id,
-          userId: updatedName.userId,
-          firstName: updatedName.firstName,
-          lastName: updatedName.lastName,
-          fullName: updatedName.fullName,
-          origin: updatedName.origin,
-          feedback: updatedName.feedback,
-          middleNames: updatedName.middleNames,
-          similarNames: updatedName.similarNames,
-          savedAt: updatedName.savedAt,
-        },
+        savedName: mapSavedNameToData(updatedName),
       };
     }
 
@@ -73,6 +73,7 @@ export async function saveNameWithMetadata(
         fullName,
         origin: metadata.origin,
         feedback: metadata.feedback,
+        popularity: metadata.popularity,
         middleNames: metadata.middleNames,
         similarNames: metadata.similarNames,
       },
@@ -80,18 +81,7 @@ export async function saveNameWithMetadata(
 
     return {
       success: true,
-      savedName: {
-        id: savedName.id,
-        userId: savedName.userId,
-        firstName: savedName.firstName,
-        lastName: savedName.lastName,
-        fullName: savedName.fullName,
-        origin: savedName.origin,
-        feedback: savedName.feedback,
-        middleNames: savedName.middleNames,
-        similarNames: savedName.similarNames,
-        savedAt: savedName.savedAt,
-      },
+      savedName: mapSavedNameToData(savedName),
     };
   } catch (error) {
     console.error("Error saving name with metadata:", error);
@@ -108,18 +98,7 @@ export async function getSavedNamesWithMetadata(
       orderBy: { savedAt: "desc" },
     });
 
-    return savedNames.map((name) => ({
-      id: name.id,
-      userId: name.userId,
-      firstName: name.firstName,
-      lastName: name.lastName,
-      fullName: name.fullName,
-      origin: name.origin,
-      feedback: name.feedback,
-      middleNames: name.middleNames,
-      similarNames: name.similarNames,
-      savedAt: name.savedAt,
-    }));
+    return mapSavedNames(savedNames);
   } catch (error) {
     console.error("Error getting saved names with metadata:", error);
     return [];
@@ -144,18 +123,7 @@ export async function getSavedNameByLookup(
 
     if (!savedName) return null;
 
-    return {
-      id: savedName.id,
-      userId: savedName.userId,
-      firstName: savedName.firstName,
-      lastName: savedName.lastName,
-      fullName: savedName.fullName,
-      origin: savedName.origin,
-      feedback: savedName.feedback,
-      middleNames: savedName.middleNames,
-      similarNames: savedName.similarNames,
-      savedAt: savedName.savedAt,
-    };
+    return mapSavedNameToData(savedName);
   } catch (error) {
     console.error("Error getting saved name by lookup:", error);
     return null;

@@ -17,7 +17,7 @@ import {
   Bookmark,
   BookmarkCheck,
 } from "lucide-react";
-import { SavedNameData } from "@/lib/database";
+import { SavedNameData } from "@/lib/types";
 
 interface NameResultsProps {
   results: SavedNameData;
@@ -39,7 +39,7 @@ export default function NameResults({
       {/* Name Rating */}
       <Card className="shadow-lg">
         <CardContent>
-          <div className="space-y-4 mt-6">
+          <div className="space-y-2 mt-6">
             <div className="flex items-center justify-between">
               <div className="text-2xl font-semibold">
                 {results.firstName} {results.lastName}
@@ -64,8 +64,14 @@ export default function NameResults({
               )}
             </div>
             <p className="text-muted-foreground">{results.feedback}</p>
-            <div className="text-xl font-bold">Origin:</div>
+            <div className="text-lg font-bold">Origin:</div>
             <p className="text-muted-foreground">{results.origin}</p>
+            {results.popularity && (
+              <>
+                <div className="text-lg font-bold">Popularity:</div>
+                <p className="text-muted-foreground">{results.popularity}</p>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>

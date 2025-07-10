@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Heart, Baby } from "lucide-react";
 
 interface NameInputFormProps {
   firstName: string;
@@ -72,13 +72,26 @@ export default function NameInputForm({
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <div className="mr-2 flex items-center gap-1">
+                  <Heart
+                    className="h-4 w-4 animate-bounce-gentle text-pink-500"
+                    style={{ animationDelay: "0ms" }}
+                  />
+                  <Sparkles
+                    className="h-4 w-4 animate-pulse-sparkle text-yellow-500"
+                    style={{ animationDelay: "200ms" }}
+                  />
+                  <Baby
+                    className="h-4 w-4 animate-wiggle text-blue-500"
+                    style={{ animationDelay: "400ms" }}
+                  />
+                </div>
                 Getting suggestions...
               </>
             ) : (
               <>
                 <Sparkles className="mr-2 h-4 w-4" />
-                Get Name Suggestions
+                Tell me about my name
               </>
             )}
           </Button>
