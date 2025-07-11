@@ -16,12 +16,14 @@ import {
   Loader2,
   Bookmark,
   BookmarkCheck,
+  RefreshCcw,
 } from "lucide-react";
 import { SavedNameData } from "@/lib/types";
 
 interface NameResultsProps {
   results: SavedNameData;
   onSaveName: () => void;
+  refreshResults: () => void;
   savingName: boolean;
   isNameSaved: boolean;
 }
@@ -29,6 +31,7 @@ interface NameResultsProps {
 export default function NameResults({
   results,
   onSaveName,
+  refreshResults,
   savingName,
   isNameSaved,
 }: NameResultsProps) {
@@ -45,22 +48,33 @@ export default function NameResults({
                 {results.firstName} {results.lastName}
               </div>
               {session && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onSaveName}
-                  disabled={savingName || isNameSaved}
-                  className="flex items-center gap-2"
-                >
-                  {savingName ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : isNameSaved ? (
-                    <BookmarkCheck className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <Bookmark className="h-4 w-4" />
-                  )}
-                  {isNameSaved ? "Saved" : "Save Name"}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onSaveName}
+                    disabled={savingName || isNameSaved}
+                    className="flex items-center gap-2"
+                  >
+                    {savingName ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isNameSaved ? (
+                      <BookmarkCheck className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Bookmark className="h-4 w-4" />
+                    )}
+                    {isNameSaved ? "Saved" : "Save Name"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={refreshResults}
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCcw className="h-4 w-4" />
+                    Refresh
+                  </Button>
+                </div>
               )}
             </div>
             <p className="text-muted-foreground">{results.feedback}</p>

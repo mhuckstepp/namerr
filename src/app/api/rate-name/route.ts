@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getNameRating } from "@/lib/network";
-import { getSavedNameByLookup } from "@/lib/database";
-import { RateNameRequest, RateNameResponse } from "@/lib/types";
+import {
+  getSavedNameByLookup,
+  getCachedName,
+  saveToCache,
+} from "@/lib/database";
+import { RateNameRequest } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,62 +17,82 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { firstName, lastName }: RateNameRequest = await request.json();
+    const { firstName, lastName, gender, refresh }: RateNameRequest =
+      await request.json();
 
-    if (!firstName || !lastName) {
+    if (!firstName || !lastName || !gender) {
       return NextResponse.json(
-        { error: "First name and last name are required" },
+        { error: "First name, last name, and gender are required" },
         { status: 400 }
       );
     }
 
-    // Check if we already have this name rated in the database
+    // First check global cache (unless refresh is requested)
+    if (!refresh) {
+      const cachedResult = await getCachedName(firstName, lastName, gender);
+      if (cachedResult) {
+        return NextResponse.json({
+          firstName,
+          lastName,
+          gender,
+          ...cachedResult,
+          cached: true,
+          source: "global_cache",
+        });
+      }
+    }
+
+    // Then check if we already have this name rated in the user's database
     const existingRating = await getSavedNameByLookup(
       session.user.id,
       firstName,
-      lastName
+      lastName,
+      gender
     );
 
-    if (existingRating) {
-      // Return cached result
-      const response: RateNameResponse = {
+    if (existingRating && !refresh) {
+      return NextResponse.json({
+        firstName,
+        lastName,
+        gender,
         origin: existingRating.origin,
         feedback: existingRating.feedback,
         popularity: existingRating.popularity,
         middleNames: existingRating.middleNames,
         similarNames: existingRating.similarNames,
-      };
-
-      return NextResponse.json({
-        ...response,
         cached: true,
+        source: "user_saved",
         savedNameId: existingRating.id,
       });
     }
 
     // Get new rating from AI
     const { feedback, origin, popularity, middleNames, similarNames } =
-      await getNameRating(firstName, lastName);
+      await getNameRating(firstName, lastName, gender);
 
-    if (!feedback) {
-      return NextResponse.json(
-        { error: "Failed to rate name" },
-        { status: 400 }
-      );
-    }
-
-    const response: RateNameResponse = {
+    const result = {
+      firstName,
+      lastName,
+      gender,
       origin,
       feedback,
       popularity,
       middleNames,
       similarNames,
+      cached: false,
+      source: "llm",
     };
 
-    return NextResponse.json({
-      ...response,
-      cached: false,
+    // Save to global cache for future requests
+    await saveToCache(firstName, lastName, gender, {
+      origin,
+      feedback,
+      popularity,
+      middleNames,
+      similarNames,
     });
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Error in rate-name API:", error);
     return NextResponse.json(

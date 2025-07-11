@@ -9,9 +9,10 @@ const model = "meta/meta-llama-3.1-405b-instruct";
 
 export const getNameRating = async (
   firstName: string,
-  lastName: string
+  lastName: string,
+  gender: string
 ): Promise<RateNameResponse> => {
-  const prompt = `Here is a baby name: "${firstName} ${lastName}". Provide a brief explanation (1-2 sentences) of why it's good or bad. Focus on the name's aesthetic qualities and how the first name fits with the last name. Only focus on the first name because the last name cannot be changed. 
+  const prompt = `Here is a baby name for a ${gender}: "${firstName} ${lastName}". Provide a brief explanation (1-2 sentences) of why it's good or bad. Focus on the name's aesthetic qualities and how the first name fits with the last name. Only focus on the first name because the last name cannot be changed. 
 
   Also provide a brief explanation of the name's origin.
 
@@ -30,9 +31,9 @@ export const getNameRating = async (
   --Similar names--: [list of similar names]
 
   Here is an example of a good response:
-  --Explanation--: "The name is unique and has a nice flow to it. It's a good fit for a boy."
+  --Explanation--: "The name is unique and has a nice flow to it. It's a good fit for a ${gender}."
   --Origin--: "The name is of Greek origin and means 'God's gift'."
-  --Popularity--: "The name is very popular in the United States, ranking in the top 100 names for both boys and girls."
+  --Popularity--: "The name is very popular in the United States, ranking in the top 100 names for ${gender}s."
   --Middle names--: James, John, Robert, Michael, David
   --Similar names--: John, Robert, Michael, David, James
   `;
@@ -63,9 +64,13 @@ export const getNameRating = async (
       : [];
 
     return {
-      feedback: explanationMatch ? explanationMatch[1].trim() : null,
-      origin: originMatch ? originMatch[1].trim() : null,
-      popularity: popularityMatch ? popularityMatch[1].trim() : null,
+      feedback: explanationMatch
+        ? explanationMatch[1].trim().replace(/^"|"$/g, "")
+        : null,
+      origin: originMatch ? originMatch[1].trim().replace(/^"|"$/g, "") : null,
+      popularity: popularityMatch
+        ? popularityMatch[1].trim().replace(/^"|"$/g, "")
+        : null,
       middleNames,
       similarNames,
     };

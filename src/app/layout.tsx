@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "Namerr - Baby Name Helper",
   description:
     "Find the perfect name for your little one with AI-powered ratings and suggestions.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

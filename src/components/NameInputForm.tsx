@@ -11,13 +11,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Sparkles, Heart, Baby } from "lucide-react";
+import { Toggle } from "@/components/ui/toggle";
+import { Sparkles, Heart, Baby, User, Users } from "lucide-react";
 
 interface NameInputFormProps {
   firstName: string;
   lastName: string;
+  gender: string;
   onFirstNameChange: (value: string) => void;
   onLastNameChange: (value: string) => void;
+  onGenderChange: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   loading: boolean;
   error: string;
@@ -26,8 +29,10 @@ interface NameInputFormProps {
 export default function NameInputForm({
   firstName,
   lastName,
+  gender,
   onFirstNameChange,
   onLastNameChange,
+  onGenderChange,
   onSubmit,
   loading,
   error,
@@ -64,6 +69,31 @@ export default function NameInputForm({
                 value={lastName}
                 onChange={(e) => onLastNameChange(e.target.value)}
               />
+            </div>
+          </div>
+
+          {/* Gender Toggle */}
+          <div className="space-y-2">
+            <Label>Gender</Label>
+            <div className="flex items-center justify-center gap-2">
+              <Toggle
+                pressed={gender === "boy"}
+                onPressedChange={() => onGenderChange("boy")}
+                aria-label="Select boy"
+                className="flex items-center gap-2"
+              >
+                <User className="h-4 w-4" />
+                Boy
+              </Toggle>
+              <Toggle
+                pressed={gender === "girl"}
+                onPressedChange={() => onGenderChange("girl")}
+                aria-label="Select girl"
+                className="flex items-center gap-2"
+              >
+                <Users className="h-4 w-4" />
+                Girl
+              </Toggle>
             </div>
           </div>
 

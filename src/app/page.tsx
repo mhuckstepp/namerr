@@ -9,11 +9,13 @@ import NameInputForm from "@/components/NameInputForm";
 import NameResults from "@/components/NameResults";
 import SavedNamesSection from "@/components/SavedNamesSection";
 import { RateNameResponse, SavedNameData } from "@/lib/types";
+import { getNameInfo } from "@/app/network";
 
 export default function BabyNameHelper() {
   const { data: session } = useSession();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [gender, setGender] = useState("boy");
   const [results, setResults] = useState<SavedNameData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -48,7 +50,6 @@ export default function BabyNameHelper() {
   const saveName = async () => {
     if (!session?.user || !results) return;
 
-    console.log("Session user:", session.user);
     setSavingName(true);
     try {
       const response = await fetch("/api/save-name", {
@@ -57,6 +58,7 @@ export default function BabyNameHelper() {
         body: JSON.stringify({
           firstName,
           lastName,
+          gender,
           metadata: results,
         }),
       });
@@ -66,11 +68,23 @@ export default function BabyNameHelper() {
         await loadSavedNames();
       }
     } catch (error) {
-      console.log("Error saving name:", error);
       console.error("Error saving name:", error);
+      setError("Failed to save name. Please try again.");
     } finally {
       setSavingName(false);
     }
+  };
+
+  const refreshResults = async () => {
+    if (!results) return;
+    const ratingResponse = await getNameInfo(
+      results.firstName,
+      results.lastName,
+      results.gender,
+      true
+    );
+    const response: SavedNameData = await ratingResponse;
+    setResults(response);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,18 +98,20 @@ export default function BabyNameHelper() {
     setError("");
 
     try {
-      const ratingResponse = await fetch("/api/rate-name", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName }),
-      });
+      const ratingResponse = await getNameInfo(
+        firstName,
+        lastName,
+        gender,
+        false
+      );
 
       // Parse the actual responses
-      const response: RateNameResponse = await ratingResponse.json();
+      const response: RateNameResponse = await ratingResponse;
 
       const results: SavedNameData = {
         firstName,
         lastName,
+        gender,
         origin: response.origin,
         feedback: response.feedback,
         popularity: response.popularity,
@@ -115,7 +131,8 @@ export default function BabyNameHelper() {
   const isNameSaved = savedNames.some(
     (name) =>
       name.firstName.toLowerCase() === firstName.toLowerCase() &&
-      name.lastName.toLowerCase() === lastName.toLowerCase()
+      name.lastName.toLowerCase() === lastName.toLowerCase() &&
+      name.gender === gender
   );
 
   const handleSavedNameClick = (name: SavedNameData) => {
@@ -133,8 +150,10 @@ export default function BabyNameHelper() {
         <NameInputForm
           firstName={firstName}
           lastName={lastName}
+          gender={gender}
           onFirstNameChange={setFirstName}
           onLastNameChange={setLastName}
+          onGenderChange={setGender}
           onSubmit={handleSubmit}
           loading={loading}
           error={error}
@@ -145,6 +164,7 @@ export default function BabyNameHelper() {
           <NameResults
             results={results}
             onSaveName={saveName}
+            refreshResults={refreshResults}
             savingName={savingName}
             isNameSaved={isNameSaved}
           />

@@ -10,7 +10,8 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }: any) {
+    async signIn({ user }: any) {
+      console.log("@@@ IN SIGN IN", { user });
       if (user.email) {
         try {
           // Create or update user in our database
@@ -30,6 +31,7 @@ export const authOptions = {
       return true;
     },
     async jwt({ token, user }: any) {
+      console.log("@@@ IN JWT", { token, user });
       if (user) {
         // Store the database user ID in the token
         token.dbUserId = user.id;
@@ -37,8 +39,8 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }: any) {
+      console.log("@@@ IN SESSION", { session, token });
       if (session?.user) {
-        // Use the database user ID instead of the OAuth ID
         session.user.id = token.dbUserId;
       }
       return session;

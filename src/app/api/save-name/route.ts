@@ -6,31 +6,25 @@ import { RateNameResponse } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("Saving name route");
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("Session user ID:", session.user.id, typeof session.user.id);
-
     const {
       firstName,
       lastName,
+      gender,
       metadata,
     }: {
       firstName: string;
       lastName: string;
+      gender: string;
       metadata: RateNameResponse;
     } = await request.json();
 
     if (!firstName || !lastName || !metadata) {
-      console.log("First name, last name, and metadata are required", {
-        firstName,
-        lastName,
-        metadata,
-      });
       return NextResponse.json(
         { error: "First name, last name, and metadata are required" },
         { status: 400 }
@@ -41,6 +35,7 @@ export async function POST(request: NextRequest) {
       session.user.id,
       firstName,
       lastName,
+      gender,
       metadata
     );
 

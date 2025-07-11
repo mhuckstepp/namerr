@@ -6,6 +6,8 @@ export interface NameRating {
 export interface RateNameRequest {
   firstName: string;
   lastName: string;
+  gender: string; // "boy" or "girl"
+  refresh: boolean;
 }
 
 // Unified type for name data throughout the app
@@ -14,6 +16,7 @@ export interface NameData {
   firstName: string;
   lastName: string;
   fullName?: string;
+  gender: string; // "boy" or "girl"
 
   // Rating/feedback fields
   origin: string | null;

@@ -33,6 +33,7 @@ model SavedName {
   firstName   String
   lastName    String
   fullName    String
+  gender      String   @default("boy") // "boy" or "girl"
   origin      String?  // e.g., "Greek", "Latin", "Hebrew"
   popularity String? // e.g. "Very popular in the 80's"
   feedback    String?  // The AI feedback about the name
@@ -41,14 +42,42 @@ model SavedName {
   savedAt     DateTime @default(now())
   
   // Create a unique constraint for quick lookups with explicit name
-  @@unique([userId, firstName, lastName], name: "userId_firstName_lastName")
+  @@unique([userId, firstName, lastName, gender], name: "userId_firstName_lastName_gender")
   
   // Index for faster queries
   @@index([userId, savedAt])
   @@index([userId, firstName, lastName])
+  @@index([userId, gender])
 
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("saved_names")
+}
+
+model NameCache {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  fullName    String
+  gender      String   @default("boy") // "boy" or "girl"
+  origin      String?  // e.g., "Greek", "Latin", "Hebrew"
+  popularity  String?  // e.g. "Very popular in the 80's"
+  feedback    String?  // The AI feedback about the name
+  middleNames String[] // Array of suggested middle names
+  similarNames String[] // Array of similar names
+  createdAt   DateTime @default(now())
+  lastAccessed DateTime @default(now())
+  accessCount Int      @default(0)
+  
+  // Create a unique constraint for quick lookups
+  @@unique([firstName, lastName, gender], name: "firstName_lastName_gender")
+  
+  // Index for faster queries and cleanup
+  @@index([firstName, lastName])
+  @@index([lastName, gender])
+  @@index([lastAccessed])
+  @@index([accessCount])
+
+  @@map("name_cache")
 }
