@@ -11,7 +11,6 @@ export const authOptions = {
   ],
   callbacks: {
     async signIn({ user }: any) {
-      console.log("@@@ IN SIGN IN");
       if (user.email) {
         try {
           // Create or update user in our database
@@ -31,7 +30,6 @@ export const authOptions = {
       return true;
     },
     async jwt({ token, user }: any) {
-      console.log("@@@ IN JWT");
       if (user) {
         // Store the database user ID in the token
         token.dbUserId = user.id;
@@ -39,7 +37,6 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }: any) {
-      console.log("@@@ IN SESSION");
       if (session?.user) {
         session.user.id = token.dbUserId;
       }

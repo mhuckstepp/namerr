@@ -22,6 +22,7 @@ import { SavedNameData } from "@/lib/types";
 
 interface NameResultsProps {
   results: SavedNameData;
+  onSetName: (firstName: string) => void;
   onSaveName: () => void;
   refreshResults: () => void;
   savingName: boolean;
@@ -30,6 +31,7 @@ interface NameResultsProps {
 
 export default function NameResults({
   results,
+  onSetName,
   onSaveName,
   refreshResults,
   savingName,
@@ -133,6 +135,7 @@ export default function NameResults({
                   key={index}
                   variant="outline"
                   className="text-sm py-1 px-3 hover:bg-primary hover:text-primary-foreground cursor-pointer transition-colors"
+                  onClick={() => onSetName(name)}
                 >
                   {name} {results.lastName}
                 </Badge>

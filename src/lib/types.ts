@@ -1,3 +1,8 @@
+export enum Gender {
+  MALE = "Male",
+  FEMALE = "Female",
+}
+
 export interface NameRating {
   score: number;
   feedback: string;
@@ -6,7 +11,7 @@ export interface NameRating {
 export interface RateNameRequest {
   firstName: string;
   lastName: string;
-  gender: string; // "boy" or "girl"
+  gender: string;
   refresh: boolean;
 }
 
@@ -16,7 +21,7 @@ export interface NameData {
   firstName: string;
   lastName: string;
   fullName?: string;
-  gender: string; // "boy" or "girl"
+  gender: string;
 
   // Rating/feedback fields
   origin: string | null;

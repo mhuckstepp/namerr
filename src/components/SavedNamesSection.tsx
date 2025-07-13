@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { BookmarkCheck, User, Users } from "lucide-react";
-import { SavedNameData } from "@/lib/types";
+import { SavedNameData, Gender } from "@/lib/types";
 
 interface SavedNamesSectionProps {
   savedNames: SavedNameData[];
@@ -23,8 +23,8 @@ export default function SavedNamesSection({
   if (savedNames.length === 0) return null;
 
   // Group names by gender
-  const boyNames = savedNames.filter((name) => name.gender === "boy");
-  const girlNames = savedNames.filter((name) => name.gender === "girl");
+  const boyNames = savedNames.filter((name) => name.gender === Gender.MALE);
+  const girlNames = savedNames.filter((name) => name.gender === Gender.FEMALE);
 
   return (
     <Card className="shadow-lg">

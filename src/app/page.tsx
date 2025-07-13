@@ -8,14 +8,15 @@ import HeaderSection from "@/components/HeaderSection";
 import NameInputForm from "@/components/NameInputForm";
 import NameResults from "@/components/NameResults";
 import SavedNamesSection from "@/components/SavedNamesSection";
-import { RateNameResponse, SavedNameData } from "@/lib/types";
+import { RateNameResponse, SavedNameData, Gender } from "@/lib/types";
 import { getNameInfo } from "@/app/network";
+import NameResultsSkeleton from "@/components/NameResultsSkeleton";
 
 export default function BabyNameHelper() {
   const { data: session } = useSession();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [gender, setGender] = useState("boy");
+  const [gender, setGender] = useState(Gender.FEMALE);
   const [results, setResults] = useState<SavedNameData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -159,10 +160,13 @@ export default function BabyNameHelper() {
           error={error}
         />
 
+        {loading && <NameResultsSkeleton />}
+
         {/* Results */}
-        {results && (
+        {!loading && results && (
           <NameResults
             results={results}
+            onSetName={setFirstName}
             onSaveName={saveName}
             refreshResults={refreshResults}
             savingName={savingName}

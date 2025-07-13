@@ -4,7 +4,7 @@ export const getNameInfo = async (
   gender: string,
   refresh: boolean
 ) => {
-  const response = await fetch("/api/rate-name", {
+  const response = await fetch("/api/analyze-name", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ firstName, lastName, gender, refresh }),

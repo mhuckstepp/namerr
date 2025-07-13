@@ -1,8 +1,7 @@
 import { prisma } from "./db";
 import { RateNameResponse, SavedNameData } from "./types";
-import type { SavedName } from "@prisma/client";
 
-function mapSavedNameToData(savedName: SavedName): SavedNameData {
+function mapSavedNameToData(savedName: any): SavedNameData {
   return {
     id: savedName.id,
     userId: savedName.userId,

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Sparkles, Heart, Baby, Mars, Venus } from "lucide-react";
+import { Gender } from "@/lib/types";
 
 interface NameInputFormProps {
   firstName: string;
@@ -20,7 +21,7 @@ interface NameInputFormProps {
   gender: string;
   onFirstNameChange: (value: string) => void;
   onLastNameChange: (value: string) => void;
-  onGenderChange: (value: string) => void;
+  onGenderChange: (value: Gender) => void;
   onSubmit: (e: React.FormEvent) => void;
   loading: boolean;
   error: string;
@@ -50,8 +51,8 @@ export default function NameInputForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={onSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={onSubmit} className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
               <Input
@@ -70,19 +71,23 @@ export default function NameInputForm({
                 onChange={(e) => onLastNameChange(e.target.value)}
               />
             </div>
-          </div>
-
-          {/* Gender Toggle */}
-          <div className="space-y-2">
-            <Label>Gender</Label>
-            <ToggleGroup variant="outline" type="single">
-              <ToggleGroupItem value="bold" aria-label="Toggle bold">
-                <Venus className="h-4 w-4" />
-              </ToggleGroupItem>
-              <ToggleGroupItem value="italic" aria-label="Toggle italic">
-                <Mars className="h-4 w-4" />
-              </ToggleGroupItem>
-            </ToggleGroup>
+            <div className="space-y-2 flex justify-start">
+              <ToggleGroup
+                variant={"outline"}
+                type="single"
+                value={gender}
+                onValueChange={onGenderChange}
+              >
+                <ToggleGroupItem value={Gender.FEMALE} aria-label="Female">
+                  <Venus className="h-4 w-4" />
+                  Girl
+                </ToggleGroupItem>
+                <ToggleGroupItem value={Gender.MALE} aria-label="Male">
+                  <Mars className="h-4 w-4" />
+                  Boy
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
           </div>
 
           {error && <div className="text-red-600 text-sm">{error}</div>}
@@ -91,20 +96,9 @@ export default function NameInputForm({
             {loading ? (
               <>
                 <div className="mr-2 flex items-center gap-1">
-                  <Heart
-                    className="h-4 w-4 animate-bounce-gentle text-pink-500"
-                    style={{ animationDelay: "0ms" }}
-                  />
-                  <Sparkles
-                    className="h-4 w-4 animate-pulse-sparkle text-yellow-500"
-                    style={{ animationDelay: "200ms" }}
-                  />
-                  <Baby
-                    className="h-4 w-4 animate-wiggle text-blue-500"
-                    style={{ animationDelay: "400ms" }}
-                  />
+                  <Baby className="h-4 w-4 text-blue-500" />
                 </div>
-                Getting suggestions...
+                Looking at your name...
               </>
             ) : (
               <>

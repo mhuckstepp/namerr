@@ -84,14 +84,7 @@ module.exports = {
           "50%": { transform: "rotate(3deg)" },
         },
       },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "bounce-gentle": "bounce-gentle 1s ease-in-out infinite",
-        "pulse-sparkle": "pulse-sparkle 1.5s ease-in-out infinite",
-        wiggle: "wiggle 0.5s ease-in-out infinite",
-      },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [],
 };
