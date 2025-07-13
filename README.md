@@ -35,7 +35,7 @@ A modern web application that helps parents find the perfect baby name using AI-
 
    ```bash
    git clone <repository-url>
-   cd namerr-backend
+   cd namerr
    ```
 
 2. **Install dependencies**
@@ -117,7 +117,7 @@ The application uses Meta's Llama 3.1 405B model via Replicate API for name anal
 ## 🏗️ Project Structure
 
 ```
-namerr-backend/
+namerr/
 ├── src/
 │   ├── app/                 # Next.js app router
 │   │   ├── api/            # API routes

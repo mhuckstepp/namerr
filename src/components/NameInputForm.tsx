@@ -11,8 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Toggle } from "@/components/ui/toggle";
-import { Sparkles, Heart, Baby, User, Users } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Sparkles, Heart, Baby, Mars, Venus } from "lucide-react";
 
 interface NameInputFormProps {
   firstName: string;
@@ -75,26 +75,14 @@ export default function NameInputForm({
           {/* Gender Toggle */}
           <div className="space-y-2">
             <Label>Gender</Label>
-            <div className="flex items-center justify-center gap-2">
-              <Toggle
-                pressed={gender === "boy"}
-                onPressedChange={() => onGenderChange("boy")}
-                aria-label="Select boy"
-                className="flex items-center gap-2"
-              >
-                <User className="h-4 w-4" />
-                Boy
-              </Toggle>
-              <Toggle
-                pressed={gender === "girl"}
-                onPressedChange={() => onGenderChange("girl")}
-                aria-label="Select girl"
-                className="flex items-center gap-2"
-              >
-                <Users className="h-4 w-4" />
-                Girl
-              </Toggle>
-            </div>
+            <ToggleGroup variant="outline" type="single">
+              <ToggleGroupItem value="bold" aria-label="Toggle bold">
+                <Venus className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="italic" aria-label="Toggle italic">
+                <Mars className="h-4 w-4" />
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
 
           {error && <div className="text-red-600 text-sm">{error}</div>}
