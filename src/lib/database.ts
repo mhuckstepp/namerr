@@ -1,3 +1,4 @@
+import { Gender } from "@prisma/client";
 import { prisma } from "./db";
 import { RateNameResponse, SavedNameData } from "./types";
 
@@ -25,10 +26,11 @@ function mapPrismaToData<T, R>(mapper: (item: T) => R) {
 const mapSavedNames = mapPrismaToData(mapSavedNameToData);
 
 export async function saveNameWithMetadata(
+  familyId: string,
   userId: string,
   firstName: string,
   lastName: string,
-  gender: string,
+  gender: Gender,
   metadata: RateNameResponse
 ): Promise<{ success: boolean; error?: any; savedName?: SavedNameData }> {
   try {
@@ -37,11 +39,11 @@ export async function saveNameWithMetadata(
     // Check if this name/style combination already exists for this user
     const existingName = await prisma.savedName.findUnique({
       where: {
-        userId_firstName_lastName_gender: {
-          userId,
+        firstName_lastName_gender_familyId: {
           firstName,
           lastName,
           gender,
+          familyId,
         },
       },
     });
@@ -70,6 +72,7 @@ export async function saveNameWithMetadata(
     const savedName = await prisma.savedName.create({
       data: {
         userId,
+        familyId,
         firstName,
         lastName,
         fullName,
@@ -109,19 +112,19 @@ export async function getSavedNamesWithMetadata(
 }
 
 export async function getSavedNameByLookup(
-  userId: string,
+  familyId: string,
   firstName: string,
   lastName: string,
-  gender: string
+  gender: Gender
 ): Promise<SavedNameData | null> {
   try {
     const savedName = await prisma.savedName.findUnique({
       where: {
-        userId_firstName_lastName_gender: {
-          userId,
+        firstName_lastName_gender_familyId: {
           firstName,
           lastName,
           gender,
+          familyId,
         },
       },
     });

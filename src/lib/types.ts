@@ -33,6 +33,7 @@ export interface NameData {
   // Database fields (optional for API responses)
   id?: string;
   userId?: string;
+  familyId?: string;
   savedAt?: Date;
 }
 
