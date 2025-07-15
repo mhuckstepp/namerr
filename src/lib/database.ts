@@ -1,5 +1,6 @@
+import { Family } from "@prisma/client";
 import { prisma } from "./db";
-import { RateNameResponse, SavedNameData } from "./types";
+import { RateNameResponse, SavedNameData, Gender } from "./types";
 
 function mapSavedNameToData(savedName: any): SavedNameData {
   return {
@@ -24,25 +25,22 @@ function mapPrismaToData<T, R>(mapper: (item: T) => R) {
 
 const mapSavedNames = mapPrismaToData(mapSavedNameToData);
 
-export async function saveNameWithMetadata(
+export async function saveName(
+  familyId: string,
   userId: string,
   firstName: string,
   lastName: string,
-  gender: string,
+  gender: Gender,
   metadata: RateNameResponse
 ): Promise<{ success: boolean; error?: any; savedName?: SavedNameData }> {
   try {
-    const fullName = `${firstName} ${lastName}`;
-
     // Check if this name/style combination already exists for this user
-    const existingName = await prisma.savedName.findUnique({
+    const existingName = await prisma.savedName.findFirst({
       where: {
-        userId_firstName_lastName_gender: {
-          userId,
-          firstName,
-          lastName,
-          gender,
-        },
+        firstName,
+        lastName,
+        gender,
+        familyId,
       },
     });
 
@@ -70,9 +68,10 @@ export async function saveNameWithMetadata(
     const savedName = await prisma.savedName.create({
       data: {
         userId,
+        familyId,
         firstName,
         lastName,
-        fullName,
+        fullName: `${firstName} ${lastName}`,
         gender,
         origin: metadata.origin,
         feedback: metadata.feedback,
@@ -92,12 +91,12 @@ export async function saveNameWithMetadata(
   }
 }
 
-export async function getSavedNamesWithMetadata(
-  userId: string
+export async function getSavedNames(
+  familyId: string
 ): Promise<SavedNameData[]> {
   try {
     const savedNames = await prisma.savedName.findMany({
-      where: { userId },
+      where: { familyId },
       orderBy: { savedAt: "desc" },
     });
 
@@ -109,20 +108,18 @@ export async function getSavedNamesWithMetadata(
 }
 
 export async function getSavedNameByLookup(
-  userId: string,
+  familyId: string,
   firstName: string,
   lastName: string,
-  gender: string
+  gender: Gender
 ): Promise<SavedNameData | null> {
   try {
-    const savedName = await prisma.savedName.findUnique({
+    const savedName = await prisma.savedName.findFirst({
       where: {
-        userId_firstName_lastName_gender: {
-          userId,
-          firstName,
-          lastName,
-          gender,
-        },
+        firstName,
+        lastName,
+        gender,
+        familyId,
       },
     });
 
@@ -179,6 +176,14 @@ export async function getOrCreateUser(
         image,
       },
     });
+
+    if (!user.familyId) {
+      const family = await prisma.family.create({ data: {} });
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { familyId: family.id },
+      });
+    }
 
     return user;
   } catch (error) {
@@ -275,54 +280,50 @@ export async function saveToCache(
   }
 }
 
-export async function cleanupOldCache(
-  olderThanDays: number = 30
-): Promise<number> {
-  try {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
+export async function getShareURL(familyId: string): Promise<string | null> {
+  const family = await prisma.family.findUnique({
+    where: { id: familyId },
+  });
 
-    const result = await prisma.nameCache.deleteMany({
-      where: {
-        lastAccessed: {
-          lt: cutoffDate,
-        },
-      },
-    });
-
-    return result.count;
-  } catch (error) {
-    console.error("Error cleaning up old cache:", error);
-    return 0;
-  }
-}
-
-export async function getCacheStats() {
-  try {
-    const [totalEntries, oldestEntry, mostAccessed] = await Promise.all([
-      prisma.nameCache.count(),
-      prisma.nameCache.findFirst({
-        orderBy: { lastAccessed: "asc" },
-        select: { lastAccessed: true },
-      }),
-      prisma.nameCache.findFirst({
-        orderBy: { accessCount: "desc" },
-        select: { firstName: true, lastName: true, accessCount: true },
-      }),
-    ]);
-
-    return {
-      totalEntries,
-      oldestEntry: oldestEntry?.lastAccessed,
-      mostAccessed: mostAccessed
-        ? {
-            name: `${mostAccessed.firstName} ${mostAccessed.lastName}`,
-            accessCount: mostAccessed.accessCount,
-          }
-        : null,
-    };
-  } catch (error) {
-    console.error("Error getting cache stats:", error);
+  if (!family) {
     return null;
   }
+
+  const inviteToken = crypto.randomUUID();
+
+  const shareURL = `${process.env.NEXT_PUBLIC_APP_URL}/share/${inviteToken}`;
+
+  await prisma.family.update({
+    where: { id: familyId },
+    data: { inviteToken },
+  });
+
+  return shareURL;
+}
+
+export async function joinFamily(
+  userId: string,
+  inviteToken: string
+): Promise<boolean> {
+  const family = await prisma.family.findUnique({
+    where: { inviteToken },
+  });
+
+  if (!family) {
+    return false;
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { familyId: family.id },
+  });
+
+  return true;
+}
+
+export async function leaveFamily(userId: string) {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { familyId: null },
+  });
 }

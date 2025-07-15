@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { saveNameWithMetadata } from "@/lib/database";
-import { RateNameResponse } from "@/lib/types";
+import { saveName } from "@/lib/database";
+import { Gender, RateNameResponse } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }: {
       firstName: string;
       lastName: string;
-      gender: string;
+      gender: Gender;
       metadata: RateNameResponse;
     } = await request.json();
 
@@ -31,11 +31,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await saveNameWithMetadata(
+    const result = await saveName(
+      session.user.familyId,
       session.user.id,
       firstName,
       lastName,
-      gender,
+      gender as Gender,
       metadata
     );
 

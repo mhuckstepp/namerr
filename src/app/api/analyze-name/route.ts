@@ -7,7 +7,7 @@ import {
   getCachedName,
   saveToCache,
 } from "@/lib/database";
-import { RateNameRequest } from "@/lib/types";
+import { RateNameRequest, Gender } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       session.user.id,
       firstName,
       lastName,
-      gender
+      gender as Gender
     );
 
     if (existingRating && !refresh) {

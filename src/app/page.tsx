@@ -78,6 +78,7 @@ export default function BabyNameHelper() {
 
   const refreshResults = async () => {
     if (!results) return;
+    setLoading(true);
     const ratingResponse = await getNameInfo(
       results.firstName,
       results.lastName,
@@ -86,6 +87,7 @@ export default function BabyNameHelper() {
     );
     const response: SavedNameData = await ratingResponse;
     setResults(response);
+    setLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,9 +133,9 @@ export default function BabyNameHelper() {
 
   const isNameSaved = savedNames.some(
     (name) =>
-      name.firstName.toLowerCase() === firstName.toLowerCase() &&
-      name.lastName.toLowerCase() === lastName.toLowerCase() &&
-      name.gender === gender
+      name.firstName.toLowerCase() === results?.firstName.toLowerCase() &&
+      name.lastName.toLowerCase() === results?.lastName.toLowerCase() &&
+      name.gender === results?.gender
   );
 
   const handleSavedNameClick = (name: SavedNameData) => {

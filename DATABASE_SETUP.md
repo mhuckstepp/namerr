@@ -83,7 +83,7 @@ npx prisma generate
 ### Saved Names Table
 
 - `id`: Unique identifier (CUID)
-- `userId`: Foreign key to users table
+- `familyId`: Foreign key to families table
 - `firstName`: First name
 - `lastName`: Last name
 - `fullName`: Combined first and last name

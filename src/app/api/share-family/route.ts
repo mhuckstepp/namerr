@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getSavedNames } from "@/lib/database";
+import { getShareURL } from "@/lib/database";
 
 export async function GET() {
   try {
@@ -13,11 +13,11 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const savedNames = await getSavedNames(familyId);
+    const shareURL = await getShareURL(familyId);
 
-    return NextResponse.json({ names: savedNames });
+    return NextResponse.json({ shareURL });
   } catch (error) {
-    console.error("Error in saved-names API:", error);
+    console.error("Error in share-family API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

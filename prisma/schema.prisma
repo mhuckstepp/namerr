@@ -21,19 +21,32 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
-  savedNames SavedName[]
+  familyId  String?  @default(cuid())
+  family    Family? @relation(fields: [familyId], references: [id])
 
   @@map("users")
+}
+
+model Family {
+  id           String     @id @default(cuid())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  inviteToken  String?    @unique  // Nullable UUID for invite links; revoke by setting to null
+
+  users        User[]
+  savedNames   SavedName[]
+
+  @@map("families")
 }
 
 model SavedName {
   id          String   @id @default(cuid())
   userId      String
+  familyId    String  
   firstName   String
   lastName    String
   fullName    String
-  gender      String   @default("boy") // "boy" or "girl"
+  gender      Gender   @default(FEMALE) // "MALE" or "FEMALE"
   origin      String?  // e.g., "Greek", "Latin", "Hebrew"
   popularity String? // e.g. "Very popular in the 80's"
   feedback    String?  // The AI feedback about the name
@@ -41,16 +54,14 @@ model SavedName {
   similarNames String[] // Array of similar names
   savedAt     DateTime @default(now())
   
-  // Create a unique constraint for quick lookups with explicit name
-  @@unique([userId, firstName, lastName, gender], name: "userId_firstName_lastName_gender")
-  
-  // Index for faster queries
-  @@index([userId, savedAt])
-  @@index([userId, firstName, lastName])
-  @@index([userId, gender])
+  // Index familyId faster queries
+  @@index([familyId, savedAt])
+  @@index([familyId, firstName, lastName])
+  @@index([familyId, gender])
 
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family    Family  @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@unique([firstName, lastName, gender, familyId])  // Prevent duplicates in a family
 
   @@map("saved_names")
 }
@@ -60,7 +71,7 @@ model NameCache {
   firstName   String
   lastName    String
   fullName    String
-  gender      String   @default("boy") // "boy" or "girl"
+  gender      String   @default("FEMALE") // "boy" or "girl"
   origin      String?  // e.g., "Greek", "Latin", "Hebrew"
   popularity  String?  // e.g. "Very popular in the 80's"
   feedback    String?  // The AI feedback about the name
@@ -80,4 +91,9 @@ model NameCache {
   @@index([accessCount])
 
   @@map("name_cache")
+}
+
+enum Gender {
+  MALE
+  FEMALE
 }

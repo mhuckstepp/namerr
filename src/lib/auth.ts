@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { getOrCreateUser } from "./database";
+import { prisma } from "./db";
 
 export const authOptions = {
   providers: [
@@ -20,7 +21,8 @@ export const authOptions = {
             user.image || undefined
           );
           // Add the database user ID to the user object
-          user.id = dbUser.id;
+          user.id = dbUser.id; 
+          user.familyId = dbUser.familyId;
           return true;
         } catch (error) {
           console.error("Error creating/updating user:", error);
@@ -33,13 +35,16 @@ export const authOptions = {
       if (user) {
         // Store the database user ID in the token
         token.dbUserId = user.id;
+        token.familyId = user.familyId;
       }
       return token;
     },
     async session({ session, token }: any) {
-      if (session?.user) {
-        session.user.id = token.dbUserId;
+      if (!session?.user) {
+        return session;
       }
+      session.user.id = token.dbUserId;
+      session.user.familyId = token.familyId;
       return session;
     },
   },
