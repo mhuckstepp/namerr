@@ -8,12 +8,7 @@ import {
   saveToCache,
   saveName,
 } from "@/lib/database";
-import {
-  RateNameRequest,
-  Gender,
-  RateNameResponse,
-  SavedNameData,
-} from "@/lib/types";
+import { RateNameRequest, Gender, SavedNameData } from "@/lib/types";
 
 enum Source {
   GLOBAL_CACHE = "global_cache",
