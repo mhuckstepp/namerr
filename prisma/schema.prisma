@@ -53,11 +53,13 @@ model SavedName {
   middleNames String[] // Array of suggested middle names
   similarNames String[] // Array of similar names
   savedAt     DateTime @default(now())
+  rank        Int      @default(0)
   
   // Index familyId faster queries
   @@index([familyId, savedAt])
   @@index([familyId, firstName, lastName])
   @@index([familyId, gender])
+  @@index([familyId, rank])
 
   family    Family  @relation(fields: [familyId], references: [id], onDelete: Cascade)
 

@@ -1,4 +1,3 @@
-import { Family } from "@prisma/client";
 import { prisma } from "./db";
 import { RateNameResponse, SavedNameData, Gender } from "./types";
 
@@ -16,6 +15,7 @@ function mapSavedNameToData(savedName: any): SavedNameData {
     middleNames: savedName.middleNames,
     similarNames: savedName.similarNames,
     savedAt: savedName.savedAt,
+    rank: savedName.rank,
   };
 }
 
@@ -64,6 +64,16 @@ export async function saveName(
       };
     }
 
+    // Get the next rank for this family and gender (0-based)
+    const maxRank = await prisma.savedName.aggregate({
+      where: {
+        familyId,
+        gender,
+      },
+      _max: { rank: true },
+    });
+    const nextRank = (maxRank._max.rank ?? -1) + 1; // Use -1 as base, so first item gets rank 0
+
     // Create new record
     const savedName = await prisma.savedName.create({
       data: {
@@ -78,6 +88,7 @@ export async function saveName(
         popularity: metadata.popularity,
         middleNames: metadata.middleNames,
         similarNames: metadata.similarNames,
+        rank: nextRank, // Set the rank within this gender
       },
     });
 
@@ -97,7 +108,10 @@ export async function getSavedNames(
   try {
     const savedNames = await prisma.savedName.findMany({
       where: { familyId },
-      orderBy: { savedAt: "desc" },
+      orderBy: [
+        { gender: "asc" }, // Boys first, then girls
+        { rank: "asc" }, // Then by rank within each gender
+      ],
     });
 
     return mapSavedNames(savedNames);
@@ -326,4 +340,28 @@ export async function leaveFamily(userId: string) {
     where: { id: userId },
     data: { familyId: null },
   });
+}
+
+// Updated function to update ranks after reordering (gender-specific)
+export async function updateNameRanks(
+  familyId: string,
+  gender: Gender,
+  nameIds: string[]
+): Promise<boolean> {
+  try {
+    // Use a transaction to update all ranks atomically
+    await prisma.$transaction(
+      nameIds.map((nameId, index) =>
+        prisma.savedName.update({
+          where: { id: nameId },
+          data: { rank: index }, // Use index directly (0-based)
+        })
+      )
+    );
+
+    return true;
+  } catch (error) {
+    console.error("Error updating name ranks:", error);
+    return false;
+  }
 }

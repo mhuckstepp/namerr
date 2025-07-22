@@ -35,9 +35,9 @@ export interface NameData {
   userId?: string;
   familyId?: string;
   savedAt?: Date;
+  rank?: number;
 }
 
-// API response type - extends NameData but makes database fields optional
 export interface RateNameResponse
   extends Pick<
     NameData,

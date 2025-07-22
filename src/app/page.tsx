@@ -180,6 +180,7 @@ export default function BabyNameHelper() {
         {session && (
           <SavedNamesSection
             savedNames={savedNames}
+            setSavedNames={setSavedNames}
             onNameClick={handleSavedNameClick}
           />
         )}
