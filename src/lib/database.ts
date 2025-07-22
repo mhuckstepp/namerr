@@ -1,5 +1,6 @@
 import { prisma } from "./db";
 import { RateNameResponse, SavedNameData, Gender } from "./types";
+import { hashPromptConfig } from "./utils";
 
 function mapSavedNameToData(savedName: any): SavedNameData {
   return {
@@ -364,4 +365,38 @@ export async function updateNameRanks(
     console.error("Error updating name ranks:", error);
     return false;
   }
+}
+
+export async function savePromptHistory(
+  prompt: string,
+  modelName: string,
+  topP: number,
+  minTokens: number,
+  temperature: number,
+  presencePenalty: number
+) {
+  const id = hashPromptConfig(
+    prompt,
+    modelName,
+    topP,
+    minTokens,
+    temperature,
+    presencePenalty
+  );
+  await prisma.promptHistory.upsert({
+    where: { id },
+    update: {
+      usageCount: { increment: 1 },
+      lastUsed: new Date(),
+    },
+    create: {
+      id,
+      prompt,
+      modelName,
+      topP,
+      minTokens,
+      temperature,
+      presencePenalty,
+    },
+  });
 }

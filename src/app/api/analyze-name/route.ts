@@ -9,6 +9,12 @@ import {
 } from "@/lib/database";
 import { RateNameRequest, Gender } from "@/lib/types";
 
+enum Source {
+  GLOBAL_CACHE = "global_cache",
+  USER_SAVED = "user_saved",
+  LLM = "llm",
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -37,12 +43,11 @@ export async function POST(request: NextRequest) {
           gender,
           ...cachedResult,
           cached: true,
-          source: "global_cache",
+          source: Source.GLOBAL_CACHE,
         });
       }
     }
 
-    // Then check if we already have this name rated in the user's database
     const existingRating = await getSavedNameByLookup(
       session.user.id,
       firstName,
@@ -61,12 +66,11 @@ export async function POST(request: NextRequest) {
         middleNames: existingRating.middleNames,
         similarNames: existingRating.similarNames,
         cached: true,
-        source: "user_saved",
+        source: Source.USER_SAVED,
         savedNameId: existingRating.id,
       });
     }
 
-    // Get new rating from AI
     const { feedback, origin, popularity, middleNames, similarNames } =
       await getNameRating(firstName, lastName, gender);
 
@@ -80,11 +84,10 @@ export async function POST(request: NextRequest) {
       middleNames,
       similarNames,
       cached: false,
-      source: "llm",
+      source: Source.LLM,
     };
 
-    // Save to global cache for future requests
-    await saveToCache(firstName, lastName, gender, {
+    saveToCache(firstName, lastName, gender, {
       origin,
       feedback,
       popularity,

@@ -50,3 +50,23 @@ export interface SavedNameData extends NameData {}
 export interface ErrorResponse {
   error: string;
 }
+
+export interface PromptHistoryEntry {
+  id: string;
+  prompt: string;
+  topP: number;
+  minTokens: number;
+  temperature: number;
+  presencePenalty: number;
+  modelName: string;
+  usageCount: number;
+  firstUsed: Date;
+  lastUsed: Date;
+}
+
+export interface PromptHistoryResponse {
+  entries: PromptHistoryEntry[];
+  total: number;
+  page: number;
+  pageSize: number;
+}

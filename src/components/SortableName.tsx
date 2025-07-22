@@ -38,11 +38,11 @@ export default function SortableNameItem({
         {...listeners}
         className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded flex-shrink-0"
       >
-        <GripVertical className="h-4 w-4 text-gray-400" />
+        <GripVertical className="h-6 w-6 text-gray-400" />
       </div>
       <Badge
         variant="secondary"
-        className="text-sm py-1 px-3 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors flex-1"
+        className="text-sm py-2 px-4 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors flex-1"
         onClick={() => onNameClick(name)}
       >
         {typeof name.rank === "number" ? name.rank + 1 : null}. {name.firstName}{" "}
