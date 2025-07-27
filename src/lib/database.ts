@@ -1,6 +1,5 @@
 import { prisma } from "./db";
 import { RateNameResponse, SavedNameData, Gender } from "./types";
-import { hashPromptConfig } from "./utils";
 
 function mapSavedNameToData(savedName: any): SavedNameData {
   return {
@@ -237,13 +236,7 @@ export async function getCachedName(
       },
     });
 
-    return {
-      origin: cachedName.origin,
-      feedback: cachedName.feedback,
-      popularity: cachedName.popularity,
-      middleNames: cachedName.middleNames,
-      similarNames: cachedName.similarNames,
-    };
+    return cachedName;
   } catch (error) {
     console.error("Error getting cached name:", error);
     return null;
@@ -251,28 +244,22 @@ export async function getCachedName(
 }
 
 export async function saveToCache(
-  firstName: string,
-  lastName: string,
-  gender: string,
-  metadata: RateNameResponse
+  nameData: RateNameResponse
 ): Promise<boolean> {
   try {
-    const fullName = `${firstName} ${lastName}`;
+    const { firstName, lastName, gender, ...metadata } = nameData;
+    const fullName = `${nameData.firstName} ${nameData.lastName}`;
 
     await prisma.nameCache.upsert({
       where: {
         firstName_lastName_gender: {
-          firstName,
-          lastName,
-          gender,
+          firstName: nameData.firstName,
+          lastName: nameData.lastName,
+          gender: nameData.gender,
         },
       },
       update: {
-        origin: metadata.origin,
-        feedback: metadata.feedback,
-        popularity: metadata.popularity,
-        middleNames: metadata.middleNames,
-        similarNames: metadata.similarNames,
+        ...nameData,
         lastAccessed: new Date(),
       },
       create: {
@@ -368,6 +355,7 @@ export async function updateNameRanks(
 }
 
 export async function savePromptHistory(
+  id: string,
   prompt: string,
   modelName: string,
   topP: number,
@@ -375,14 +363,6 @@ export async function savePromptHistory(
   temperature: number,
   presencePenalty: number
 ) {
-  const id = hashPromptConfig(
-    prompt,
-    modelName,
-    topP,
-    minTokens,
-    temperature,
-    presencePenalty
-  );
   await prisma.promptHistory.upsert({
     where: { id },
     update: {
@@ -399,4 +379,47 @@ export async function savePromptHistory(
       presencePenalty,
     },
   });
+}
+
+export async function savePromptFeedback(
+  promptId: string,
+  feedback: {
+    analysisFeedback?: string;
+    analysisFeedbackQuant?: number;
+    originFeedback?: string;
+    originFeedbackQuant?: number;
+    popularityFeedback?: string;
+    popularityFeedbackQuant?: number;
+    similarNamesFeedback?: string;
+    similarNamesFeedbackQuant?: number;
+    middleNamesFeedback?: string;
+    middleNamesFeedbackQuant?: number;
+    feedbackQuality?: number;
+    sessionId?: string;
+  },
+  userId?: string
+) {
+  try {
+    await prisma.promptFeedback.create({
+      data: {
+        promptId,
+        userId,
+        sessionId: feedback.sessionId,
+        analysisFeedback: feedback.analysisFeedback,
+        analysisFeedbackQuant: feedback.analysisFeedbackQuant,
+        originFeedback: feedback.originFeedback,
+        originFeedbackQuant: feedback.originFeedbackQuant,
+        popularityFeedback: feedback.popularityFeedback,
+        popularityFeedbackQuant: feedback.popularityFeedbackQuant,
+        similarNamesFeedback: feedback.similarNamesFeedback,
+        similarNamesFeedbackQuant: feedback.similarNamesFeedbackQuant,
+        middleNamesFeedback: feedback.middleNamesFeedback,
+        middleNamesFeedbackQuant: feedback.middleNamesFeedbackQuant,
+        feedbackQuality: feedback.feedbackQuality,
+      },
+    });
+  } catch (error) {
+    console.error("Error saving prompt feedback:", error);
+    throw error;
+  }
 }

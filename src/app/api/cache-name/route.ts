@@ -23,8 +23,6 @@ export async function POST(request: NextRequest) {
       const cachedResult = await getCachedName(firstName, lastName, gender);
       if (cachedResult) {
         return NextResponse.json({
-          firstName,
-          lastName,
           ...cachedResult,
           cached: true,
           source: "cache",
@@ -49,7 +47,10 @@ export async function POST(request: NextRequest) {
     };
 
     // Save to cache for future requests
-    await saveToCache(firstName, lastName, gender, {
+    await saveToCache({
+      firstName,
+      lastName,
+      gender,
       origin,
       feedback,
       popularity,
@@ -85,9 +86,6 @@ export async function GET(request: NextRequest) {
     const cachedResult = await getCachedName(firstName, lastName, gender);
     if (cachedResult) {
       return NextResponse.json({
-        firstName,
-        lastName,
-        gender,
         ...cachedResult,
         cached: true,
         source: "cache",

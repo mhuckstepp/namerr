@@ -13,6 +13,7 @@ export interface RateNameRequest {
   lastName: string;
   gender: string;
   refresh: boolean;
+  isSaved: boolean;
 }
 
 // Unified type for name data throughout the app
@@ -36,12 +37,21 @@ export interface NameData {
   familyId?: string;
   savedAt?: Date;
   rank?: number;
+  promptId?: string;
 }
 
 export interface RateNameResponse
   extends Pick<
     NameData,
-    "origin" | "feedback" | "popularity" | "middleNames" | "similarNames"
+    | "firstName"
+    | "lastName"
+    | "gender"
+    | "origin"
+    | "feedback"
+    | "popularity"
+    | "middleNames"
+    | "similarNames"
+    | "promptId"
   > {}
 
 // Database type - extends NameData with all fields

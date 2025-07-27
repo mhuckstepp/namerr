@@ -11,6 +11,7 @@ import SavedNamesSection from "@/components/SavedNamesSection";
 import { RateNameResponse, SavedNameData, Gender } from "@/lib/types";
 import { getNameInfo } from "@/app/network";
 import NameResultsSkeleton from "@/components/NameResultsSkeleton";
+import { isSameName } from "./utils";
 
 export default function BabyNameHelper() {
   const { data: session } = useSession();
@@ -79,15 +80,19 @@ export default function BabyNameHelper() {
   const refreshResults = async () => {
     if (!results) return;
     setLoading(true);
-    const ratingResponse = await getNameInfo(
-      results.firstName,
-      results.lastName,
-      results.gender,
-      true
-    );
+    const ratingResponse = await getNameInfo({
+      firstName: results.firstName,
+      lastName: results.lastName,
+      gender: results.gender,
+      isSaved: isNameSaved,
+      refresh: true,
+    });
     const response: SavedNameData = await ratingResponse;
     setResults(response);
     setLoading(false);
+    setSavedNames(
+      savedNames.map((name) => (isSameName(name, results) ? response : name))
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -101,20 +106,21 @@ export default function BabyNameHelper() {
     setError("");
 
     try {
-      const ratingResponse = await getNameInfo(
+      const ratingResponse = await getNameInfo({
         firstName,
         lastName,
         gender,
-        false
-      );
+        isSaved: false,
+        refresh: false,
+      });
 
       // Parse the actual responses
       const response: RateNameResponse = await ratingResponse;
 
       const results: SavedNameData = {
-        firstName,
-        lastName,
-        gender,
+        firstName: response.firstName,
+        lastName: response.lastName,
+        gender: response.gender,
         origin: response.origin,
         feedback: response.feedback,
         popularity: response.popularity,
@@ -156,7 +162,12 @@ export default function BabyNameHelper() {
           gender={gender}
           onFirstNameChange={setFirstName}
           onLastNameChange={setLastName}
-          onGenderChange={setGender}
+          onGenderChange={(value) => {
+            // Don't allow the gender to be set to null
+            if (value) {
+              setGender(value as Gender);
+            }
+          }}
           onSubmit={handleSubmit}
           loading={loading}
           error={error}

@@ -1,6 +1,7 @@
 import Replicate from "replicate";
 import { RateNameResponse } from "./types";
 import { savePromptHistory } from "./database";
+import { hashPromptConfig } from "./utils";
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
@@ -40,7 +41,17 @@ export const getNameRating = async (
 
   const parsed = JSON.parse(jsonString);
 
+  const promptId = hashPromptConfig(
+    prompt,
+    modelName,
+    input.top_p,
+    input.min_tokens,
+    input.temperature,
+    input.presence_penalty
+  );
+
   savePromptHistory(
+    promptId,
     prompt,
     modelName,
     input.top_p,
@@ -50,6 +61,10 @@ export const getNameRating = async (
   );
 
   return {
+    promptId,
+    firstName: parsed.firstName || null,
+    lastName: parsed.lastName || null,
+    gender: parsed.gender || null,
     feedback: parsed.feedback || null,
     origin: parsed.origin || null,
     popularity: parsed.popularity || null,

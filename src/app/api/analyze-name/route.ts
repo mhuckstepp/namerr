@@ -6,8 +6,14 @@ import {
   getSavedNameByLookup,
   getCachedName,
   saveToCache,
+  saveName,
 } from "@/lib/database";
-import { RateNameRequest, Gender } from "@/lib/types";
+import {
+  RateNameRequest,
+  Gender,
+  RateNameResponse,
+  SavedNameData,
+} from "@/lib/types";
 
 enum Source {
   GLOBAL_CACHE = "global_cache",
@@ -23,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { firstName, lastName, gender, refresh }: RateNameRequest =
+    const { firstName, lastName, gender, refresh, isSaved }: RateNameRequest =
       await request.json();
 
     if (!firstName || !lastName || !gender) {
@@ -38,9 +44,6 @@ export async function POST(request: NextRequest) {
       const cachedResult = await getCachedName(firstName, lastName, gender);
       if (cachedResult) {
         return NextResponse.json({
-          firstName,
-          lastName,
-          gender,
           ...cachedResult,
           cached: true,
           source: Source.GLOBAL_CACHE,
@@ -71,31 +74,29 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { feedback, origin, popularity, middleNames, similarNames } =
-      await getNameRating(firstName, lastName, gender);
+    const metadata = await getNameRating(firstName, lastName, gender);
 
-    const result = {
-      firstName,
-      lastName,
-      gender,
-      origin,
-      feedback,
-      popularity,
-      middleNames,
-      similarNames,
+    saveToCache(metadata);
+
+    let savedName: SavedNameData | undefined;
+    // If they have already saved the name and are refreshing, update the saved version and return an update name with rank
+    if (isSaved && refresh) {
+      const response = await saveName(
+        session.user.familyId,
+        session.user.id,
+        firstName,
+        lastName,
+        gender as Gender,
+        metadata
+      );
+      savedName = response.savedName;
+    }
+    return NextResponse.json({
+      ...metadata,
+      ...savedName,
       cached: false,
       source: Source.LLM,
-    };
-
-    saveToCache(firstName, lastName, gender, {
-      origin,
-      feedback,
-      popularity,
-      middleNames,
-      similarNames,
     });
-
-    return NextResponse.json(result);
   } catch (error) {
     console.error("Error in rate-name API:", error);
     return NextResponse.json(

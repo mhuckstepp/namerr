@@ -1,13 +1,10 @@
-export const getNameInfo = async (
-  firstName: string,
-  lastName: string,
-  gender: string,
-  refresh: boolean
-) => {
+import { RateNameRequest } from "@/lib/types";
+
+export const getNameInfo = async (request: RateNameRequest) => {
   const response = await fetch("/api/analyze-name", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ firstName, lastName, gender, refresh }),
+    body: JSON.stringify(request),
   });
 
   if (!response.ok) {
