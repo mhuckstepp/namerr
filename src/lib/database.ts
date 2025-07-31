@@ -1,5 +1,10 @@
 import { prisma } from "./db";
-import { RateNameResponse, SavedNameData, Gender } from "./types";
+import {
+  RateNameResponse,
+  SavedNameData,
+  Gender,
+  PromptFeedbackData,
+} from "./types";
 
 function mapSavedNameToData(savedName: any): SavedNameData {
   return {
@@ -247,6 +252,7 @@ export async function saveToCache(
   nameData: RateNameResponse
 ): Promise<boolean> {
   try {
+    console.log("saveToCache", { nameData });
     const { firstName, lastName, gender, ...metadata } = nameData;
     const fullName = `${nameData.firstName} ${nameData.lastName}`;
 
@@ -383,20 +389,7 @@ export async function savePromptHistory(
 
 export async function savePromptFeedback(
   promptId: string,
-  feedback: {
-    analysisFeedback?: string;
-    analysisFeedbackQuant?: number;
-    originFeedback?: string;
-    originFeedbackQuant?: number;
-    popularityFeedback?: string;
-    popularityFeedbackQuant?: number;
-    similarNamesFeedback?: string;
-    similarNamesFeedbackQuant?: number;
-    middleNamesFeedback?: string;
-    middleNamesFeedbackQuant?: number;
-    feedbackQuality?: number;
-    sessionId?: string;
-  },
+  feedback: PromptFeedbackData,
   userId?: string
 ) {
   try {
@@ -404,7 +397,6 @@ export async function savePromptFeedback(
       data: {
         promptId,
         userId,
-        sessionId: feedback.sessionId,
         analysisFeedback: feedback.analysisFeedback,
         analysisFeedbackQuant: feedback.analysisFeedbackQuant,
         originFeedback: feedback.originFeedback,
@@ -415,7 +407,6 @@ export async function savePromptFeedback(
         similarNamesFeedbackQuant: feedback.similarNamesFeedbackQuant,
         middleNamesFeedback: feedback.middleNamesFeedback,
         middleNamesFeedbackQuant: feedback.middleNamesFeedbackQuant,
-        feedbackQuality: feedback.feedbackQuality,
       },
     });
   } catch (error) {

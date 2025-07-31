@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
         firstName,
         lastName,
         gender,
+        promptId: existingRating.promptId,
         origin: existingRating.origin,
         feedback: existingRating.feedback,
         popularity: existingRating.popularity,

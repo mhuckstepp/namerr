@@ -109,12 +109,8 @@ model PromptFeedback {
   middleNamesFeedbackQuant  Float?
 
   // Metadata
-  userId    String? // Optional: track which user provided feedback
-  sessionId String? // Optional: track session context
+  userId    String?
   createdAt DateTime @default(now())
-
-  // Optional: feedback quality/rating
-  feedbackQuality Int? // 1-5 rating of feedback quality
 
   // Relations
   prompt PromptHistory @relation(fields: [promptId], references: [id], onDelete: Cascade)
@@ -122,7 +118,6 @@ model PromptFeedback {
 
   // Indexes for efficient querying
   @@index([promptId, createdAt])
-  @@index([promptId, feedbackQuality])
   @@index([userId, createdAt])
   @@map("prompt_feedback")
 }

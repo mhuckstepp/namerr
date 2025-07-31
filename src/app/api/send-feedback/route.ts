@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { savePromptFeedback } from "@/lib/database";
+import { PromptFeedbackData } from "@/lib/types";
 
-// Save feedback by promptId to the prompt feedback table
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
@@ -21,19 +21,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate that at least one feedback field is provided
-    const hasFeedback = Object.values(feedback).some(
-      (value) => value !== undefined && value !== null && value !== ""
+    await savePromptFeedback(
+      promptId,
+      feedback as PromptFeedbackData,
+      session.user.id
     );
-
-    if (!hasFeedback) {
-      return NextResponse.json(
-        { error: "At least one feedback field must be provided" },
-        { status: 400 }
-      );
-    }
-
-    await savePromptFeedback(promptId, feedback, session.user.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

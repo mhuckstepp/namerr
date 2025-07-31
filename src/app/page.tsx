@@ -114,21 +114,9 @@ export default function BabyNameHelper() {
         refresh: false,
       });
 
-      // Parse the actual responses
-      const response: RateNameResponse = await ratingResponse;
-
-      const results: SavedNameData = {
-        firstName: response.firstName,
-        lastName: response.lastName,
-        gender: response.gender,
-        origin: response.origin,
-        feedback: response.feedback,
-        popularity: response.popularity,
-        middleNames: response.middleNames,
-        similarNames: response.similarNames || [],
-      };
-
-      setResults(results);
+      const response: SavedNameData = await ratingResponse;
+      console.log("handleSubmit", { response });
+      setResults(response);
     } catch (err) {
       console.error(err);
       setError("Failed to get name suggestions. Please try again.");

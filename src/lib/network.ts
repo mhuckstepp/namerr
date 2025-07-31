@@ -42,7 +42,7 @@ export const getNameRating = async (
   const parsed = JSON.parse(jsonString);
 
   const promptId = hashPromptConfig(
-    prompt,
+    promptTemplate,
     modelName,
     input.top_p,
     input.min_tokens,
@@ -62,9 +62,9 @@ export const getNameRating = async (
 
   return {
     promptId,
-    firstName: parsed.firstName || null,
-    lastName: parsed.lastName || null,
-    gender: parsed.gender || null,
+    firstName: firstName,
+    lastName: lastName,
+    gender: gender,
     feedback: parsed.feedback || null,
     origin: parsed.origin || null,
     popularity: parsed.popularity || null,

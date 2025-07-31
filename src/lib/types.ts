@@ -80,3 +80,28 @@ export interface PromptHistoryResponse {
   page: number;
   pageSize: number;
 }
+
+// Prompt Feedback Types
+export interface PromptFeedbackData {
+  // Core feedback fields
+  analysisFeedback?: string;
+  analysisFeedbackQuant?: number;
+  originFeedback?: string;
+  originFeedbackQuant?: number;
+  popularityFeedback?: string;
+  popularityFeedbackQuant?: number;
+  similarNamesFeedback?: string;
+  similarNamesFeedbackQuant?: number;
+  middleNamesFeedback?: string;
+  middleNamesFeedbackQuant?: number;
+}
+
+export interface PromptFeedbackRequest {
+  promptId: string;
+  feedback: PromptFeedbackData;
+}
+
+export interface PromptFeedbackResponse {
+  success: boolean;
+  error?: string;
+}
