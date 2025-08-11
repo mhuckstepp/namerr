@@ -148,7 +148,7 @@ export default function NameResults({
   };
 
   const handleSubmitFeedback = async () => {
-    console.log("handleSubmitFeedback", results.promptId);
+    console.log("handleSubmitFeedback", results);
     if (!results.promptId) return;
 
     setIsSubmittingFeedback(true);
@@ -190,28 +190,15 @@ export default function NameResults({
   return (
     <div className="space-y-6">
       {/* Name Rating */}
-      <Card className="shadow-lg">
+      <Card className="shadow-lg relative">
         <CardContent>
-          <div className="space-y-4 mt-6">
+          <div className="space-y-4 my-6">
             <div className="flex items-center justify-between">
               <div className="text-2xl font-semibold">
                 {results.firstName} {results.lastName}
               </div>
               {session && (
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowAllFeedback(!showAllFeedback)}
-                    className="flex items-center gap-2"
-                  >
-                    {showAllFeedback ? (
-                      <X className="h-4 w-4" />
-                    ) : (
-                      <MessageSquare className="h-4 w-4" />
-                    )}
-                    {showAllFeedback ? "Hide Feedback" : "Give Feedback"}
-                  </Button>
                   {showAllFeedback && (
                     <Button
                       onClick={handleSubmitFeedback}
@@ -310,6 +297,27 @@ export default function NameResults({
             </div>
           </div>
         </CardContent>
+
+        {/* Feedback button positioned at bottom right */}
+        {session && (
+          <div className="absolute bottom-2 right-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAllFeedback(!showAllFeedback)}
+              className="flex items-center gap-1 h-8 px-2"
+            >
+              {showAllFeedback ? (
+                <X className="h-4 w-4" />
+              ) : (
+                <MessageSquare className="h-4 w-4" />
+              )}
+              <span className="text-xs">
+                {showAllFeedback ? "Hide Feedback" : "Give Feedback"}
+              </span>
+            </Button>
+          </div>
+        )}
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

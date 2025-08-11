@@ -93,6 +93,7 @@ export async function saveName(
         popularity: metadata.popularity,
         middleNames: metadata.middleNames,
         similarNames: metadata.similarNames,
+        promptId: metadata.promptId,
         rank: nextRank, // Set the rank within this gender
       },
     });
@@ -153,7 +154,6 @@ export async function getSavedNameByLookup(
 
 export async function removeNameWithMetadata(userId: string, nameId: string) {
   try {
-    // Verify the name belongs to the user before deleting
     const savedName = await prisma.savedName.findFirst({
       where: {
         id: nameId,
@@ -252,9 +252,10 @@ export async function saveToCache(
   nameData: RateNameResponse
 ): Promise<boolean> {
   try {
-    console.log("saveToCache", { nameData });
-    const { firstName, lastName, gender, ...metadata } = nameData;
-    const fullName = `${nameData.firstName} ${nameData.lastName}`;
+    const copy = { ...nameData };
+    delete copy.promptId;
+    const { firstName, lastName, gender, ...metadata } = copy;
+    const fullName = `${copy.firstName} ${copy.lastName}`;
 
     await prisma.nameCache.upsert({
       where: {
@@ -265,7 +266,7 @@ export async function saveToCache(
         },
       },
       update: {
-        ...nameData,
+        ...copy,
         lastAccessed: new Date(),
       },
       create: {
@@ -369,7 +370,16 @@ export async function savePromptHistory(
   temperature: number,
   presencePenalty: number
 ) {
-  await prisma.promptHistory.upsert({
+  console.log("@@@ IN SAVE PROMPT HISTORY", {
+    id,
+    prompt,
+    modelName,
+    topP,
+    minTokens,
+    temperature,
+    presencePenalty,
+  });
+  let result = await prisma.promptHistory.upsert({
     where: { id },
     update: {
       usageCount: { increment: 1 },
@@ -385,6 +395,8 @@ export async function savePromptHistory(
       presencePenalty,
     },
   });
+
+  console.log("@@@ RESULT", { result });
 }
 
 export async function savePromptFeedback(
@@ -413,4 +425,12 @@ export async function savePromptFeedback(
     console.error("Error saving prompt feedback:", error);
     throw error;
   }
+}
+
+export async function getLatestPromptFeedback() {
+  const prompt = await prisma.promptHistory.findFirst({
+    orderBy: { lastUsed: "desc" },
+  });
+
+  return prompt;
 }

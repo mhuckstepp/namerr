@@ -19,18 +19,22 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import SortableNameItem from "./SortableName";
+import SavedNamesSkeleton from "./SavedNamesSkeleton";
 
 interface SavedNamesSectionProps {
   savedNames: SavedNameData[];
   setSavedNames: (names: SavedNameData[]) => void;
   onNameClick: (name: SavedNameData) => void;
+  isLoading: boolean;
 }
 
 export default function SavedNamesSection({
   savedNames,
   setSavedNames,
   onNameClick,
+  isLoading,
 }: SavedNamesSectionProps) {
+  console.log("@@@ SAVED NAMES SECTION", { savedNames });
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -38,7 +42,9 @@ export default function SavedNamesSection({
     })
   );
 
-  if (savedNames.length === 0) return null;
+  if (isLoading) {
+    return <SavedNamesSkeleton />;
+  }
 
   const boyNames =
     savedNames.filter((name) => name.gender === Gender.MALE) || [];

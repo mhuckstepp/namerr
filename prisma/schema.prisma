@@ -55,6 +55,7 @@ model SavedName {
   similarNames String[] // Array of similar names
   savedAt      DateTime @default(now())
   rank         Int      @default(0)
+  promptId     String?  @default("")
 
   family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
 
@@ -81,6 +82,7 @@ model NameCache {
   createdAt    DateTime @default(now())
   lastAccessed DateTime @default(now())
   accessCount  Int      @default(0)
+  promptId     String?  @default("")
 
   // Create a unique constraint for quick lookups
   @@unique([firstName, lastName, gender], name: "firstName_lastName_gender")

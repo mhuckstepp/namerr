@@ -17,13 +17,12 @@ export const getNameInfo = async (request: RateNameRequest) => {
 export const sendFeedback = async (
   promptId: string,
   name: string,
-  feedback: string,
-  feedbackType: string
+  feedback: string
 ) => {
   const response = await fetch("/api/send-feedback", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ promptId, name, feedback, feedbackType }),
+    body: JSON.stringify({ promptId, name, feedback }),
   });
 
   if (!response.ok) {

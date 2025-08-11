@@ -21,6 +21,7 @@ export default function BabyNameHelper() {
   const [results, setResults] = useState<SavedNameData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isLoadingSavedNames, setIsLoadingSavedNames] = useState(false);
   const [savedNames, setSavedNames] = useState<SavedNameData[]>([]);
   const [savingName, setSavingName] = useState(false);
 
@@ -38,6 +39,7 @@ export default function BabyNameHelper() {
   }, [session]);
 
   const loadSavedNames = async () => {
+    setIsLoadingSavedNames(true);
     try {
       const response = await fetch("/api/saved-names");
       if (response.ok) {
@@ -46,6 +48,8 @@ export default function BabyNameHelper() {
       }
     } catch (error) {
       console.error("Error loading saved names:", error);
+    } finally {
+      setIsLoadingSavedNames(false);
     }
   };
 
@@ -161,6 +165,16 @@ export default function BabyNameHelper() {
           error={error}
         />
 
+        {/* Saved Names Section */}
+        {session && (
+          <SavedNamesSection
+            savedNames={savedNames}
+            setSavedNames={setSavedNames}
+            onNameClick={handleSavedNameClick}
+            isLoading={isLoadingSavedNames}
+          />
+        )}
+
         {loading && <NameResultsSkeleton />}
 
         {/* Results */}
@@ -172,15 +186,6 @@ export default function BabyNameHelper() {
             refreshResults={refreshResults}
             savingName={savingName}
             isNameSaved={isNameSaved}
-          />
-        )}
-
-        {/* Saved Names Section */}
-        {session && (
-          <SavedNamesSection
-            savedNames={savedNames}
-            setSavedNames={setSavedNames}
-            onNameClick={handleSavedNameClick}
           />
         )}
       </div>

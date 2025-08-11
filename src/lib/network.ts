@@ -52,7 +52,7 @@ export const getNameRating = async (
 
   savePromptHistory(
     promptId,
-    prompt,
+    promptTemplate,
     modelName,
     input.top_p,
     input.min_tokens,
