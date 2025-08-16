@@ -4,8 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { getNameRating } from "@/lib/network";
 import {
   getSavedNameByLookup,
-  getCachedName,
-  saveToCache,
   saveName,
 } from "@/lib/database";
 import { RateNameRequest, Gender, SavedNameData } from "@/lib/types";
@@ -34,18 +32,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // First check global cache (unless refresh is requested)
-    if (!refresh) {
-      const cachedResult = await getCachedName(firstName, lastName, gender);
-      if (cachedResult) {
-        return NextResponse.json({
-          ...cachedResult,
-          cached: true,
-          source: Source.GLOBAL_CACHE,
-        });
-      }
-    }
-
     const existingRating = await getSavedNameByLookup(
       session.user.id,
       firstName,
@@ -71,8 +57,6 @@ export async function POST(request: NextRequest) {
     }
 
     const metadata = await getNameRating(firstName, lastName, gender);
-
-    saveToCache(metadata);
 
     let savedName: SavedNameData | undefined;
     // If they have already saved the name and are refreshing, update the saved version and return an update name with rank

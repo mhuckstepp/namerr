@@ -41,31 +41,25 @@ model Family {
 }
 
 model SavedName {
-  id          String   @id @default(cuid())
-  userId      String
-  familyId    String  
-  firstName   String
-  lastName    String
-  fullName    String
-  gender      Gender   @default(FEMALE) // "MALE" or "FEMALE"
-  origin      String?  // e.g., "Greek", "Latin", "Hebrew"
-  popularity String? // e.g. "Very popular in the 80's"
-  feedback    String?  // The AI feedback about the name
-  middleNames String[] // Array of suggested middle names
-  similarNames String[] // Array of similar names
-  savedAt     DateTime @default(now())
-  
-  // Index familyId faster queries
-  @@index([familyId, savedAt])
-  @@index([familyId, firstName, lastName])
-  @@index([familyId, gender])
+  id           String   @id @default(cuid())
+  userId       String
+  familyId     String
+  firstName    String
+  lastName     String
+  fullName     String
+  gender       Gender   @default(FEMALE)
+  origin       String?
+  popularity   String?
+  feedback     String?
+  middleNames  String[]
+  similarNames String[]
+  savedAt      DateTime @default(now())
+  rank         Int      @default(0)
+  promptId     String?  @default("")
 
-  family    Family  @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
 
-  @@unique([firstName, lastName, gender, familyId])  // Prevent duplicates in a family
-
-  @@unique([firstName, lastName, gender, familyId]) // Prevent duplicates in a family
-  // Index familyId faster queries
+  @@unique([firstName, lastName, gender, familyId])
   @@index([familyId, savedAt])
   @@index([familyId, firstName, lastName])
   @@index([familyId, gender])
